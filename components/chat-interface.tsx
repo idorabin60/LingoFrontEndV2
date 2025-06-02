@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "@/components/chat-message"
 import { Send } from "lucide-react"
-import { chatWithTools } from "@/lib/gptTools"
 import { getChatResponse } from "@/lib/api"
 
 type Message = {
