@@ -5,12 +5,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle } from "lucide-react"
 import type { FillInBlank } from "@/lib/types"
+
 type FillInBlanksTaskProps = {
-  task: FillInBlank;
-  selectedAnswer: string;
-  onSelectAnswer: (answer: string) => void;
-};
-export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }:FillInBlanksTaskProps) {
+  task: FillInBlank
+  selectedAnswer: string
+  onSelectAnswer: (answer: string) => void
+}
+
+export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }: FillInBlanksTaskProps) {
+  console.log(task)
   const [draggedOption, setDraggedOption] = useState(null)
   const [isChecking, setIsChecking] = useState(false)
   const [isCorrect, setIsCorrect] = useState(null)
@@ -18,6 +21,33 @@ export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }:FillIn
 
   // Split the sentence by the placeholder
   const sentenceParts = task.sentence.split("___")
+
+  // Split the Hebrew sentence by the placeholder
+  const hebrewSentenceParts = task.hebrew_sentence ? task.hebrew_sentence.split("___") : []
+
+  // Function to extract Arabic and Hebrew parts from an option
+  const extractParts = (option: string) => {
+    if (!option) return { arabic: "", hebrew: "" }
+
+    // Match pattern: "Arabic text ‎(Hebrew text)"
+    const match = option.match(/^(.*?)\s*\((.*?)\)$/u)
+
+    if (match) {
+      return {
+        arabic: match[1].trim(),
+        hebrew: match[2].trim(),
+      }
+    }
+
+    // Fallback if the pattern doesn't match
+    return {
+      arabic: option,
+      hebrew: "",
+    }
+  }
+
+  // Extract parts from the selected answer
+  const selectedParts = extractParts(selectedAnswer)
 
   // Reset feedback when answer changes
   useEffect(() => {
@@ -50,10 +80,10 @@ export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }:FillIn
 
     // Check if the selected answer is correct
     const correct = selectedAnswer === task.correct_option
-    setIsCorrect(correct) //need to fix ido!
+    setIsCorrect(correct)
     setFeedbackVisible(true)
 
-    // Hide feedback after 3 seconds
+    // Hide feedback after a short delay if incorrect
     setTimeout(() => {
       setIsChecking(false)
       // Keep feedback visible if correct
@@ -65,11 +95,12 @@ export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }:FillIn
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Fill in the Blank</h2>
+      <h2 className="text-2xl font-bold">השלם את המשפט</h2>
 
       <Card>
         <CardContent className="pt-6">
-          <div className="text-xl mb-6 text-right" dir="rtl" onDragOver={handleDragOver} onDrop={handleDrop}>
+          {/* Arabic sentence */}
+          <div className="text-xl mb-4 text-right" dir="rtl" onDragOver={handleDragOver} onDrop={handleDrop}>
             {sentenceParts[0]}
             <span
               className={`inline-block min-w-20 mx-1 px-2 py-1 border-b-2 text-center ${
@@ -82,10 +113,31 @@ export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }:FillIn
                   : "border-dashed border-gray-400"
               }`}
             >
-              {selectedAnswer || "___"}
+              {selectedParts.arabic || "___"}
             </span>
             {sentenceParts[1]}
           </div>
+
+          {/* Hebrew sentence - now with same styling as Arabic */}
+          {task.hebrew_sentence && (
+            <div className="text-xl mb-6 text-right" dir="rtl">
+              {hebrewSentenceParts[0]}
+              <span
+                className={`inline-block min-w-20 mx-1 px-2 py-1 border-b-2 text-center ${
+                  selectedAnswer
+                    ? isCorrect === true && feedbackVisible
+                      ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                      : isCorrect === false && feedbackVisible
+                        ? "border-red-500 bg-red-50 dark:bg-red-900/20"
+                        : "border-primary"
+                    : "border-dashed border-gray-400"
+                }`}
+              >
+                {selectedParts.hebrew || "___"}
+              </span>
+              {hebrewSentenceParts[1]}
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-4 mt-8">
             {task.options.map((option, index) => (

@@ -3,7 +3,7 @@
 import axios from "axios";
 
 // You might want to store this in an environment variable:
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://aslibackend-render.onrender.com";
 
 // Create an instance of axios with default settings:
 const axiosClient = axios.create({

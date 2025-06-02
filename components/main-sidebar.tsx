@@ -1,4 +1,5 @@
 "use client"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -14,21 +15,55 @@ interface MainSidebarProps {
 }
 
 export function MainSidebar({ isOpen, onClose, currentPath, isCollapsed }: MainSidebarProps) {
-  const navItems = [
-    { id: "home", label: "Home", icon: Home, href: "/" },
-    { id: "homework", label: "Homework", icon: BookOpen, href: "/homework" },
-    { id: "support", label: "Support Chat", icon: MessageCircle, href: "/support" },
-    { id: "lessons", label: "Lessons", icon: GraduationCap, href: "/lessons" },
-    { id: "tutors", label: "Tutors", icon: Headphones, href: "/tutors" },
-    { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
-    { id: "help", label: "Help Center", icon: HelpCircle, href: "/help" },
-  ]
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get user role from localStorage
+    const userString = localStorage.getItem("user")
+    if (userString) {
+      try {
+        const user = JSON.parse(userString)
+        setUserRole(user.role)
+      } catch (error) {
+        console.error("Error parsing user data:", error)
+      }
+    }
+  }, [])
+
+  // Determine home href based on user role
+  const getHomeHref = () => {
+    return userRole === "teacher" ? "/teacher-dashboard" : "/"
+  }
+  let navItems: Array<{ id: string; label: string; icon: any; href: string }> = [];
+  if (userRole =="teacher"){
+     navItems = [
+      { id: "home", label: "Home", icon: Home, href: getHomeHref() },
+      { id: "support", label: "Support Chat", icon: MessageCircle, href: "/support" },
+      // { id: "lessons", label: "Lessons", icon: GraduationCap, href: "/lessons" },
+      // { id: "tutors", label: "Tutors", icon: Headphones, href: "/tutors" },
+      // { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+      // { id: "help", label: "Help Center", icon: HelpCircle, href: "/help" },
+    ]
+  }
+  else{
+     navItems = [
+      { id: "home", label: "Home", icon: Home, href: getHomeHref() },
+      { id: "homework", label: "Homework", icon: BookOpen, href: "/homework" },
+      { id: "support", label: "Support Chat", icon: MessageCircle, href: "/support" },
+      // { id: "lessons", label: "Lessons", icon: GraduationCap, href: "/lessons" },
+      // { id: "tutors", label: "Tutors", icon: Headphones, href: "/tutors" },
+      // { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+      // { id: "help", label: "Help Center", icon: HelpCircle, href: "/help" },
+    ]
+
+  }
+  
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className={`p-6  ${isCollapsed ? "p-3" : ""}`}>
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={getHomeHref()} className="flex items-center gap-2">
             <div className="bg-primary text-primary-foreground w-8 h-8 rounded-md flex items-center justify-center font-bold">
               LN
             </div>
@@ -44,7 +79,15 @@ export function MainSidebar({ isOpen, onClose, currentPath, isCollapsed }: MainS
         <TooltipProvider delayDuration={0}>
           <nav className="space-y-2">
             {navItems.map((item) => {
-              const isActive = item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href)
+              // Update active check for home item based on user role
+              const isActive =
+                item.id === "home"
+                  ? userRole === "teacher"
+                    ? currentPath === "/teacher-dashboard"
+                    : currentPath === "/"
+                  : item.href === "/"
+                    ? currentPath === "/"
+                    : currentPath.startsWith(item.href)
 
               const NavItem = () => (
                 <div

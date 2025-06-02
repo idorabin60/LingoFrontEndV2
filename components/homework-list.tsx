@@ -9,22 +9,22 @@ interface HomeworkListProps {
 
 export function HomeworkList({ homeworks }: HomeworkListProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" dir="rtl">
       {homeworks.map((homework) => (
         <Link href={`/homework/${homework.id}`} key={homework.id}>
           <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Homework #{homework.id}</CardTitle>
+              <CardTitle className="text-right">שיעורי בית {homework.id}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                This homework contains {homework.fill_in_blanks.length} fill-in-blank exercises and{" "}
-                {homework.vocab_matches.length} vocabulary matching exercises.
+              <p className="text-muted-foreground text-right">
+                שיעורי בית אלה מכילים {homework.fill_in_blanks.length} תרגילי מילוי חללים ו-
+                {homework.vocab_matches.length} תרגילי התאמת אוצר מילים.
               </p>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-muted-foreground">
-                Due date: <span className="font-medium">{formatDate(homework.due_date)}</span>
+              <p className="text-sm text-muted-foreground text-right">
+               תאריך שיעור: <span className="font-medium">{formatDate(homework.due_date)}</span>
               </p>
             </CardFooter>
           </Card>

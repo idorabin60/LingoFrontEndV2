@@ -7,7 +7,8 @@ export interface GrammaticalPhenomenon {
   
   export interface FillInBlank {
     id: number
-    sentence: string
+    sentence: string,
+    hebrew_sentence: string,
     options: string[]
     correct_option: string
     homework: number

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import axiosClient from "./axiosClient";
 import type { Homework } from "./types"
@@ -43,15 +44,33 @@ export async function submitHomework(
  * @param {string} email
  * @returns Promise
  */
-export function signup(username: string, password: string, email: string, first_name: string, last_name: string) {
-  return axiosClient.post("/signup", {
+export function signup(
+  username: string,
+  password: string,
+  email: string,
+  first_name: string,
+  last_name: string,
+  role: string,
+  teacherId?: number
+) {
+  // build payload
+  const payload: Record<string, any> = {
     username,
     password,
     email,
     first_name,
     last_name,
-  });
+    role,
+  };
+
+  // only send teacher if role === 'student'
+  if (role === 'student' && teacherId != null) {
+    payload.teacher = teacherId;
+  }
+
+  return axiosClient.post("/signup", payload);
 }
+
 
 /**
  * LOGIN
@@ -60,13 +79,29 @@ export function signup(username: string, password: string, email: string, first_
  * @param {string} password
  * @returns Promise
  */
-export function login(username:string, password: string) {
+export function login(email:string, password: string) {
   return axiosClient.post("/login", {
-    username,
+    email,
     password,
   });
 }
-
+export function students_of_teacher(teacherId:string){
+  return axiosClient.get(`/students_of_teacher/${teacherId}`)
+}
+export function student_homeworks(studentId: string) {
+  return axiosClient.get(`/students/${studentId}/homeworks/`)
+}
+export function student_homework_detail(studentId: string, homeworkId: string) {
+  return axiosClient.get(
+    `/students/${studentId}/homeworks/${homeworkId}/`
+  )
+}
+export function getUserById(userId: string) {
+  return axiosClient.get(`/users/${userId}/`)
+}
+export function getChatResponse(prompt: string) {
+  return axiosClient.post("chatbot/", { prompt })
+}
 /**
  * GET USER HOMEWORKS
  *
@@ -81,3 +116,13 @@ export function getUserHomeworks() {
 export function getUserHomeWorkByid(id:string){
   return axiosClient.get(`/homeworks/${id}`)
 }
+
+export function getTeachers() {
+  return axiosClient.get("/get_teachers");
+}
+
+
+
+
+
+

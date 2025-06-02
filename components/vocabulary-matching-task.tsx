@@ -79,43 +79,19 @@ export function VocabularyMatchingTask({ vocabItems, matches, onMatch }) {
   const isHebrewIncorrect = (id) => incorrectMatch.hebrewId === id
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Vocabulary Matching</h2>
+    <div className="space-y-6" dir="rtl">
+      <h2 className="text-2xl font-bold text-right">התאמת מילים</h2>
 
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 text-right">
           <p className="mb-4">
-            Match each Arabic word with its Hebrew equivalent by selecting a word from each column.
+            תתאים בין המילה בעברית לערבית
           </p>
 
           <div className="grid grid-cols-2 gap-8">
-            {/* Arabic column */}
+            {/* Hebrew column (renders on the left in RTL) */}
             <div className="space-y-2">
-              <h3 className="font-medium mb-2 text-center">Arabic</h3>
-              <div className="space-y-2">
-                {arabicItems.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => !isArabicMatched(item.id) && handleArabicClick(item.id)}
-                    className={`
-                      p-3 text-right rounded-md cursor-pointer transition-colors
-                      ${isArabicSelected(item.id) ? "bg-primary text-primary-foreground" : ""}
-                      ${isArabicMatched(item.id) ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100" : ""}
-                      ${isArabicIncorrect(item.id) ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100" : ""}
-                      ${!isArabicSelected(item.id) && !isArabicMatched(item.id) && !isArabicIncorrect(item.id) ? "bg-muted hover:bg-muted/80" : ""}
-                      ${isArabicMatched(item.id) ? "cursor-default" : ""}
-                    `}
-                    dir="rtl"
-                  >
-                    {item.arabic_word}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Hebrew column */}
-            <div className="space-y-2">
-              <h3 className="font-medium mb-2 text-center">Hebrew</h3>
+              <h3 className="font-medium mb-2 text-center">עברית</h3>
               <div className="space-y-2">
                 {hebrewItems.map((item) => (
                   <div
@@ -136,17 +112,42 @@ export function VocabularyMatchingTask({ vocabItems, matches, onMatch }) {
                 ))}
               </div>
             </div>
+
+            {/* Arabic column (renders on the right in RTL) */}
+            <div className="space-y-2">
+              <h3 className="font-medium mb-2 text-center">العربية</h3>
+              <div className="space-y-2">
+                {arabicItems.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => !isArabicMatched(item.id) && handleArabicClick(item.id)}
+                    className={`
+                      p-3 text-right rounded-md cursor-pointer transition-colors
+                      ${isArabicSelected(item.id) ? "bg-primary text-primary-foreground" : ""}
+                      ${isArabicMatched(item.id) ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100" : ""}
+                      ${isArabicIncorrect(item.id) ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100" : ""}
+                      ${!isArabicSelected(item.id) && !isArabicMatched(item.id) && !isArabicIncorrect(item.id) ? "bg-muted hover:bg-muted/80" : ""}
+                      ${isArabicMatched(item.id) ? "cursor-default" : ""}
+                    `}
+                    dir="rtl"
+                  >
+                    {item.arabic_word}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="mt-6 text-sm text-muted-foreground">
-            <p>
-              Matched pairs: {Object.keys(matches).length} of {vocabItems.length}
-            </p>
-          </div>
+          <div className="mt-6 text-sm text-muted-foreground text-right">
+  <p>
+    זוגות תואמים: {Object.keys(matches).length} מתוך {vocabItems.length}
+  </p>
+</div>
+
         </CardContent>
       </Card>
 
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground text-right">
         <p>Select a word from either column, then select its matching word from the other column.</p>
         <p>Correct matches will stay highlighted in green. Incorrect matches will flash red briefly.</p>
       </div>

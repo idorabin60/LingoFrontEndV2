@@ -8,7 +8,7 @@ import { AppLayout } from "@/components/app-layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Lingo Native DB",
+  title: "Lingo Native",
   description: "Language learning platform with homework and support",
 }
 
