@@ -172,7 +172,7 @@ export function FillInBlanksTask({ task, selectedAnswer, onSelectAnswer }: FillI
               disabled={!selectedAnswer || isChecking || (isCorrect === true && feedbackVisible)}
               className="w-40"
             >
-              {isChecking ? "Checking..." : "Check Answer"}
+              {isChecking ? "טוען..." : "בדוק את תשובתך"}
             </Button>
           </div>
 

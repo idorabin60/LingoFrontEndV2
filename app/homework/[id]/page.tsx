@@ -263,13 +263,13 @@ export default function HomeworkWizard({ params }: { params: { id: string } }) {
         </Card>
 
         {/* Progress bar */}
-        <div className="space-y-2 mb-6">
+        {/* <div className="space-y-2 mb-6">
           <div className="flex justify-between text-sm">
             <span>{progress}%</span>
             <span>התקדמות</span>
           </div>
           <Progress value={progress} className="h-2" />
-        </div>
+        </div> */}
       </div>
 
       {/* Current task */}
