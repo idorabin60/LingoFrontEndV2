@@ -245,7 +245,11 @@ export default function HomeworkWizard({ params }: { params: { id: string } }) {
         <Button variant="outline" onClick={() => router.push("/")} className="mb-4">
           דף הבית →
         </Button>
-        <h1 className="text-3xl font-bold mb-2 text-right">שיעורי בית {homework.id}</h1>
+        <h1 className="text-3xl font-bold mb-2 text-right">שיעורי בית    -{" "}
+                {new Date(homework.due_date).toLocaleDateString("he-IL", {
+                  month: "long",
+                  day: "numeric",
+                })}</h1>
         <p className="text-muted-foreground mb-4 text-right">תאריך שיעור: {formatDate(homework.due_date)}</p>
 
         {/* Grammatical phenomenon */}

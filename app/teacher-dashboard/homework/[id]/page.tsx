@@ -70,7 +70,14 @@ export default function HomeworkDetailsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl text-right" dir="rtl">
       <div className="flex items-center mb-8 justify-between">
-        <h1 className="text-3xl font-bold">שיעורי בית #{homework.id}</h1>
+      <h1 className="text-3xl font-bold">
+  שיעורי בית –{" "}
+  {new Date(homework.due_date).toLocaleDateString("he-IL", {
+    month: "long",
+    day: "numeric",
+  })}
+</h1>
+
         <Button variant="outline" onClick={handleBack}>
           חזרה <ArrowRight className="mr-2 h-4 w-4" />
         </Button>

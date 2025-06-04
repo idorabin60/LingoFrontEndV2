@@ -44,7 +44,12 @@ export default function StudentHomeworkPage({ params }: { params: { id: string }
         setHomeworks(
           data.map(hw => ({
             id: hw.id,
-            title: hw.title || `שיעורי בית ${hw.id}`,
+            title:
+    hw.title ||
+    `שיעורי בית – ${new Date(hw.due_date).toLocaleDateString("he-IL", {
+      month: "long",
+      day: "numeric",
+    })}`,
             description: hw.description || '',
             dueDate: hw.due_date || hw.dueDate,
           }))

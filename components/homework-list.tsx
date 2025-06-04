@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Homework } from "@/lib/types"
-import { formatDate } from "@/lib/utils2"
 
 interface HomeworkListProps {
   homeworks: Homework[]
@@ -12,9 +11,15 @@ export function HomeworkList({ homeworks }: HomeworkListProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" dir="rtl">
       {homeworks.map((homework) => (
         <Link href={`/homework/${homework.id}`} key={homework.id}>
-          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow text-right">
             <CardHeader>
-              <CardTitle className="text-right">שיעורי בית {homework.id}</CardTitle>
+              <CardTitle className="text-right">
+                שיעורי בית -{" "}
+                {new Date(homework.due_date).toLocaleDateString("he-IL", {
+                  month: "long",
+                  day: "numeric",
+                })}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-right">
@@ -22,9 +27,16 @@ export function HomeworkList({ homeworks }: HomeworkListProps) {
                 {homework.vocab_matches.length} תרגילי התאמת אוצר מילים.
               </p>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="justify-end">
               <p className="text-sm text-muted-foreground text-right">
-               תאריך שיעור: <span className="font-medium">{formatDate(homework.due_date)}</span>
+                תאריך יעד:{" "}
+                <span className="font-medium">
+                  {new Date(homework.due_date).toLocaleDateString("he-IL", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
               </p>
             </CardFooter>
           </Card>
