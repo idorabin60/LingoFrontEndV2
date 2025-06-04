@@ -120,6 +120,9 @@ export function getUserHomeWorkByid(id:string){
 export function getTeachers() {
   return axiosClient.get("/get_teachers");
 }
+export function getUserHomeworksLastTwoWeeks() {
+  return axiosClient.get("/homeworks/recent/");
+}
 
 
 ///

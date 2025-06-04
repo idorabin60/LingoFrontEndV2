@@ -130,7 +130,7 @@ export function MainSidebar({ isOpen, onClose, currentPath, isCollapsed }: MainS
         </TooltipProvider>
       </ScrollArea>
 
-      {!isCollapsed && (
+      {/* {!isCollapsed && (
         <div className="p-6 border-t mt-auto">
           <div className="bg-muted rounded-lg p-4">
             <h4 className="font-medium mb-2">Need more help?</h4>
@@ -140,7 +140,7 @@ export function MainSidebar({ isOpen, onClose, currentPath, isCollapsed }: MainS
             </Button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 
