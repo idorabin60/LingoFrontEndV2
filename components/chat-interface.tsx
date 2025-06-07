@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +8,45 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "@/components/chat-message"
 import { Send } from "lucide-react"
 import { getChatResponse } from "@/lib/api"
+
+/* ------------------------------------------------------------------
+   קבוע: ההנחיות המלאות שה-LLM חייב לקבל בכל קריאה
+------------------------------------------------------------------ */
+const SYSTEM_INSTRUCTIONS = `
+## A. Language & Register
+1. Write ALL Arabic in Palestinian Colloquial Arabic only.
+2. If a reply includes a single Arabic word (not inside a full Arabic sentence), present it exactly like:
+   كلمة ‎(תַעְתִּיק)
+   • No other brackets, glyphs, Latin letters or Arabic diacritics may appear inside ( … ).
+3. Every transliteration must use our mapping (ب=bּ, ت=ת, ج=ג׳, خ=ח׳ …) and include at least one Hebrew niqqud sign.
+
+### B. Answer Style
+4. Keep answers concise and relevant to the learner’s question.
+5. If the learner asks “מה התשובה?” / “What’s the correct word?”, DO NOT reveal it directly.
+   • Instead, give a hint (e.g., meaning, first/last letter, grammatical gender) or explain the rule needed.
+   • Offer to check the learner’s attempt once they try.
+6. Always respect the learner’s level: plain explanations, no academic jargon.
+
+### C. Allowed Content & Tone
+7. No profanity, no dialect-mixing, no references to politics or religion unless explicitly asked.
+8. Stay encouraging and positive; correct errors gently.
+
+### D. Examples (follow exactly)
+• “מה זה ‎خيار ‎(כְּיַאר)?”
+  → ‎خيار ‎(כְּיַאר) يعني “מלפפון”.
+• “למה هنا قلنا البنات ולא البنت?”
+  → זו צורת ריבוי נקבה ***ـات***: بنت → بنات.
+• “מה ההגייה של كلمة ‎بطيخ ‎(בַּטִיחְ)?”
+  → ‎بطيخ ‎(בַּטִיחְ) – הטעם על ההברה השנייה.
+
+3) INTERNAL QA – בדיקות חובה לפני שליחת תגובה
+[ ] כל תעתיק עומד במפת-הניקוד, אין אותיות ערביות בסוגריים.
+[ ] אין סוגריים אחרים זולת ‎( … ).
+[ ] אם רומזים על התשובה, לא לחשוף אותה מפורשות.
+[ ] עברית/אנגלית נקייה משגיאות כתיב.
+[ ] לא להזכיר את המילה פלסטיני
+` as const
+/* ------------------------------------------------------------------ */
 
 type Message = {
   id: string
@@ -25,7 +63,12 @@ interface ChatInterfaceProps {
   totalSteps?: number
 }
 
-export function ChatInterface({ currentQuestion, questionType, currentStep, totalSteps }: ChatInterfaceProps) {
+export function ChatInterface({
+  currentQuestion,
+  questionType,
+  currentStep,
+  totalSteps,
+}: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -38,47 +81,52 @@ export function ChatInterface({ currentQuestion, questionType, currentStep, tota
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom when messages change
+  /* --------------------------------------------------------------
+     גלילה אוטומטית לתחתית בכל עדכון הודעות
+  -------------------------------------------------------------- */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // Create a formatted context string based on the current question
+  /* --------------------------------------------------------------
+     יצירת מחרוזת קונטקסט לשאלה הנוכחית (אם קיימת)
+  -------------------------------------------------------------- */
   const getQuestionContext = () => {
     if (!currentQuestion) return ""
 
-    let contextString = `[Context: ${questionType === "fill-in-blank" ? "Fill in the blank" : "Vocabulary matching"} - Step ${currentStep} of ${totalSteps}]\n\n`
+    let ctx = `[Context: ${
+      questionType === "fill-in-blank" ? "Fill in the blank" : "Vocabulary matching"
+    } – Step ${currentStep} of ${totalSteps}]\n\n`
 
     if (questionType === "fill-in-blank") {
-      contextString += `Arabic sentence: ${currentQuestion.sentence}\n`
+      ctx += `Arabic sentence: ${currentQuestion.sentence}\n`
       if (currentQuestion.hebrew_sentence) {
-        contextString += `Hebrew sentence: ${currentQuestion.hebrew_sentence}\n`
+        ctx += `Hebrew sentence: ${currentQuestion.hebrew_sentence}\n`
       }
-      contextString += `Options: ${currentQuestion.options.join(", ")}\n`
+      ctx += `Options: ${currentQuestion.options.join(", ")}\n`
     } else if (questionType === "vocab-matching") {
-      contextString += "Vocabulary matching exercise with the following words:\n"
-      // Assuming currentQuestion is an array of vocab items in this case
+      ctx += "Vocabulary matching exercise with the following words:\n"
       if (Array.isArray(currentQuestion)) {
-        const sampleItems = currentQuestion.slice(0, 5) // Take first 5 items to avoid too much context
-        sampleItems.forEach((item) => {
-          contextString += `- Arabic: ${item.arabic_word}, Hebrew: ${item.hebrew_word}\n`
+        const sample = currentQuestion.slice(0, 5)
+        sample.forEach((item: any) => {
+          ctx += `- Arabic: ${item.arabic_word}, Hebrew: ${item.hebrew_word}\n`
         })
         if (currentQuestion.length > 5) {
-          contextString += `... and ${currentQuestion.length - 5} more words\n`
+          ctx += `... and ${currentQuestion.length - 5} more words\n`
         }
       }
     }
-
-    return contextString
+    return ctx
   }
 
+  /* --------------------------------------------------------------
+     שליחת הודעה (Enter או לחיצה על כפתור)
+  -------------------------------------------------------------- */
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
 
-    // Get context about the current question
     const questionContext = getQuestionContext()
 
-    // Add user message (visible to user)
     const userVisibleMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -86,38 +134,50 @@ export function ChatInterface({ currentQuestion, questionType, currentStep, tota
       timestamp: new Date(),
       questionContext: currentQuestion,
     }
-
     setMessages((prev) => [...prev, userVisibleMessage])
     setInputValue("")
     setIsTyping(true)
 
     try {
-      // Create the actual message to send to the AI with context
-      const messageWithContext = questionContext + inputValue +  "תענה תמיד בעברית"
+      /* פרומפט מלא: הנחיות + קונטקסט + שאלה + דרישה לעברית */
+      const fullPrompt = `
+${SYSTEM_INSTRUCTIONS}
 
-      const res = await getChatResponse(messageWithContext)
-      const assistantText = res.data.response
-      const botMessage: Message = {
-        id: Date.now().toString(),
-        content: assistantText ?? "מצטער, לא הצלחתי לעבד את הבקשה שלך.",
-        sender: "bot",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, botMessage])
-    } catch (error) {
-      console.error("Error in chat:", error)
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: "מצטער, אירעה שגיאה בעיבוד הבקשה שלך.",
-        sender: "bot",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
+${questionContext}
+${inputValue}
+
+תענה תמיד בעברית
+`.trim()
+
+      const res = await getChatResponse(fullPrompt)
+      const assistantText = res.data.response ?? "מצטער, לא הצלחתי לעבד את הבקשה שלך."
+      console.log(assistantText)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          content: assistantText,
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ])
+    } catch (err) {
+      console.error("Error in chat:", err)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          content: "מצטער, אירעה שגיאה בעיבוד הבקשה שלך.",
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ])
     } finally {
       setIsTyping(false)
     }
   }
 
+  /* שליחת הודעה ב-Enter (ללא Shift) */
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -125,13 +185,16 @@ export function ChatInterface({ currentQuestion, questionType, currentStep, tota
     }
   }
 
+  /* --------------------------------------------------------------
+     JSX
+  -------------------------------------------------------------- */
   return (
     <div className="flex flex-col h-full" dir="rtl">
-      {/* Messages area */}
+      {/* אזור הודעות */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
+          {messages.map((m) => (
+            <ChatMessage key={m.id} message={m} />
           ))}
 
           {isTyping && (
@@ -141,15 +204,15 @@ export function ChatInterface({ currentQuestion, questionType, currentStep, tota
                 <div
                   className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
                   style={{ animationDelay: "0ms" }}
-                ></div>
+                />
                 <div
                   className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
                   style={{ animationDelay: "150ms" }}
-                ></div>
+                />
                 <div
                   className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
                   style={{ animationDelay: "300ms" }}
-                ></div>
+                />
               </div>
             </div>
           )}
@@ -158,7 +221,7 @@ export function ChatInterface({ currentQuestion, questionType, currentStep, tota
         </div>
       </ScrollArea>
 
-      {/* Input area */}
+      {/* אזור קלט */}
       <div className="border-t p-4">
         <div className="flex gap-2">
           <Button onClick={handleSendMessage} disabled={!inputValue.trim() || isTyping}>

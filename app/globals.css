@@ -1,13 +1,8 @@
-/* --- Tailwind directives: keep at the very top, nothing above them --- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---------------------------------------------------------
-   Custom design tokens & base styles
----------------------------------------------------------*/
 @layer base {
-  /* 1. CSS variables – light mode */
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -40,7 +35,6 @@
     --radius: 0.5rem;
   }
 
-  /* 2. Dark‑mode overrides */
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -70,36 +64,110 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
-
-  /* 3. Global element styles */
-  *    { @apply border-border; }          /* hairline borders everywhere (optional) */
-  body { @apply bg-background text-foreground; }
 }
 
-/* ---------------------------------------------------------
-   Utility helpers & custom animations
----------------------------------------------------------*/
+@layer base {
+  /* Removed the problematic line that was using border-border */
+  body {
+    @apply bg-background text-foreground;
+  }
+}
 
-/* RTL helper */
-[dir='rtl'] { text-align: right; }
+/* Custom styles for RTL text */
+[dir="rtl"] {
+  text-align: right;
+}
 
-/* Vocabulary‑matching colours */
-.matched-word    { @apply bg-green-100 dark:bg-green-900  text-green-800 dark:text-green-100; }
-.incorrect-match { @apply bg-red-100  dark:bg-red-900   text-red-800  dark:text-red-100; }
+/* Enhanced bidirectional text support */
+.bidi-text {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
 
-/* Shake animation */
+/* Fix for mixed RTL/LTR content */
+.mixed-content {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+.mixed-content * {
+  unicode-bidi: plaintext;
+}
+
+/* Styles for the vocabulary matching task */
+.matched-word {
+  @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100;
+}
+
+.incorrect-match {
+  @apply bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100;
+}
+
+/* Animation for incorrect matches */
 @keyframes shake {
-  0%,100% { transform: translateX(0); }
-  10%,30%,50%,70%,90% { transform: translateX(-5px); }
-  20%,40%,60%,80%     { transform: translateX( 5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
-.shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 
-/* Fill‑in‑the‑blank */
-.blank-space     { @apply inline-block min-w-20 mx-1 px-2 py-1 border-b-2 text-center; }
-.blank-correct   { @apply border-green-500 bg-green-50 dark:bg-green-900/20; }
-.blank-incorrect { @apply border-red-500   bg-red-50   dark:bg-red-900/20; }
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
-/* Fade‑in */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.fade-in { animation: fadeIn 0.3s ease-in; }
+/* Styles for the fill-in-blanks task */
+.blank-space {
+  @apply inline-block min-w-20 mx-1 px-2 py-1 border-b-2 text-center;
+}
+
+.blank-correct {
+  @apply border-green-500 bg-green-50 dark:bg-green-900/20;
+}
+
+.blank-incorrect {
+  @apply border-red-500 bg-red-50 dark:bg-red-900/20;
+}
+
+/* Transition effects */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Better bidirectional text handling */
+.chat-message {
+  direction: rtl;
+  unicode-bidi: plaintext;
+}
+
+.chat-message p {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/* Fix punctuation in RTL context */
+.rtl-punctuation {
+  unicode-bidi: embed;
+  direction: ltr;
+}
