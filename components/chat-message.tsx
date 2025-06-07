@@ -1,5 +1,4 @@
 "use client"
-
 import { cn } from "@/lib/utils"
 
 type Message = {
@@ -19,11 +18,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className={cn("flex gap-3 mb-4", isBot ? "justify-end" : "justify-start")} dir="rtl">
-      {!isBot && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-semibold text-sm">
-          את/ה
-        </div>
-      )}
+     
 
       <div className="flex flex-col max-w-[80%]">
         <div
