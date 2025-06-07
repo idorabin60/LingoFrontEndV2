@@ -46,7 +46,6 @@ const SYSTEM_INSTRUCTIONS = `
 [ ] עברית/אנגלית נקייה משגיאות כתיב.
 [ ] לא להזכיר את המילה פלסטיני
 ` as const
-/* ------------------------------------------------------------------ */
 
 type Message = {
   id: string
@@ -107,13 +106,9 @@ export function ChatInterface({
     } else if (questionType === "vocab-matching") {
       ctx += "Vocabulary matching exercise with the following words:\n"
       if (Array.isArray(currentQuestion)) {
-        const sample = currentQuestion.slice(0, 5)
-        sample.forEach((item: any) => {
+        currentQuestion.forEach((item: any) => {
           ctx += `- Arabic: ${item.arabic_word}, Hebrew: ${item.hebrew_word}\n`
         })
-        if (currentQuestion.length > 5) {
-          ctx += `... and ${currentQuestion.length - 5} more words\n`
-        }
       }
     }
     return ctx
@@ -148,6 +143,7 @@ ${inputValue}
 
 תענה תמיד בעברית
 `.trim()
+console.log(fullPrompt)
 
       const res = await getChatResponse(fullPrompt)
       const assistantText = res.data.response ?? "מצטער, לא הצלחתי לעבד את הבקשה שלך."
