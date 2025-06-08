@@ -5,6 +5,11 @@ import type { Homework } from "@/lib/types"
 interface HomeworkListProps {
   homeworks: Homework[]
 }
+const getDueDatePlusTwoWeeks = (isoString: string) => {
+  const date = new Date(isoString);
+  date.setDate(date.getDate() + 14);    // add 14 days
+  return date;
+};
 
 export function HomeworkList({ homeworks }: HomeworkListProps) {
   return (
@@ -28,16 +33,17 @@ export function HomeworkList({ homeworks }: HomeworkListProps) {
               </p>
             </CardContent>
             <CardFooter className="justify-end">
-              <p className="text-sm text-muted-foreground text-right">
-                תאריך יעד:{" "}
-                <span className="font-medium">
-                  {new Date(homework.due_date).toLocaleDateString("he-IL", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </p>
+            <p className="text-sm text-muted-foreground text-right">
+    תאריך יעד:{" "}
+    <span className="font-medium">
+      {getDueDatePlusTwoWeeks(homework.due_date)
+        .toLocaleDateString("he-IL", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+    </span>
+  </p>
             </CardFooter>
           </Card>
         </Link>
